@@ -106,6 +106,13 @@
       font-weight: 600;
       background: var(--panel-2);
     }
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.sortable:hover {
+      color: var(--text);
+    }
     tr:last-child td { border-bottom: 0; }
     .tabs {
       display: flex;
@@ -132,6 +139,27 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.45;
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    input {
+      width: min(360px, 100%);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .count {
+      color: var(--muted);
+      font-size: 13px;
     }
     @media (max-width: 760px) {
       header { padding: 22px 18px 14px; }
@@ -190,6 +218,33 @@
       </div>
       <p class="note">Bu panel sadece backtest sonuclarini gosterir. Bot kontrolu, API key veya gercek emir yetkisi icermez.</p>
     </section>
+
+    <section>
+      <h2>Tum Backtestler</h2>
+      <div class="toolbar">
+        <input id="filter" type="search" placeholder="Strateji, coin veya dosya ara">
+        <div class="count" id="all-count">Yukleniyor...</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-key="strategy">Strateji</th>
+              <th class="sortable" data-key="profit">Net Kar</th>
+              <th class="sortable" data-key="usdt">USDT</th>
+              <th class="sortable" data-key="win">Win Rate</th>
+              <th class="sortable" data-key="trades">Trade</th>
+              <th class="sortable" data-key="daily">Gunluk</th>
+              <th class="sortable" data-key="dd">Max DD</th>
+              <th class="sortable" data-key="pf">PF</th>
+              <th class="sortable" data-key="date">Tarih</th>
+              <th>Coinler</th>
+            </tr>
+          </thead>
+          <tbody id="all-backtests"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -245,6 +300,71 @@
       tabs.appendChild(button);
     });
     selectStrategy(0);
+
+    let allBacktests = [];
+    let sortKey = "profit";
+    let sortDir = -1;
+    const allBody = document.getElementById("all-backtests");
+    const allCount = document.getElementById("all-count");
+    const filter = document.getElementById("filter");
+
+    function shortPairs(text) {
+      if (!text) return "";
+      return text.length > 80 ? `${text.slice(0, 80)}...` : text;
+    }
+
+    function renderAllBacktests() {
+      const query = filter.value.trim().toLowerCase();
+      const filtered = allBacktests.filter((row) => {
+        const haystack = `${row.strategy} ${row.file} ${row.pairs}`.toLowerCase();
+        return haystack.includes(query);
+      });
+      filtered.sort((a, b) => {
+        const av = a[sortKey];
+        const bv = b[sortKey];
+        if (typeof av === "number" && typeof bv === "number") return (av - bv) * sortDir;
+        return String(av).localeCompare(String(bv), "tr") * sortDir;
+      });
+      allCount.textContent = `${filtered.length} / ${allBacktests.length} backtest`;
+      allBody.innerHTML = filtered.map((row) => `
+        <tr>
+          <td>${row.strategy}</td>
+          <td class="${cls(row.profit)}">${pct(row.profit)}</td>
+          <td>${num(row.usdt)}</td>
+          <td>${row.win.toFixed(1)}%</td>
+          <td>${row.trades}</td>
+          <td>${row.daily.toFixed(2)}</td>
+          <td>${row.dd.toFixed(2)}%</td>
+          <td>${Number.isFinite(row.pf) ? row.pf.toFixed(2) : ""}</td>
+          <td>${row.date}</td>
+          <td title="${row.pairs || ""}">${shortPairs(row.pairs)}</td>
+        </tr>
+      `).join("");
+    }
+
+    document.querySelectorAll("th.sortable").forEach((header) => {
+      header.addEventListener("click", () => {
+        const key = header.dataset.key;
+        if (sortKey === key) {
+          sortDir *= -1;
+        } else {
+          sortKey = key;
+          sortDir = ["profit", "usdt", "win", "trades", "daily", "pf"].includes(key) ? -1 : 1;
+        }
+        renderAllBacktests();
+      });
+    });
+    filter.addEventListener("input", renderAllBacktests);
+
+    fetch("backtests.json")
+      .then((response) => response.json())
+      .then((rows) => {
+        allBacktests = rows;
+        renderAllBacktests();
+      })
+      .catch(() => {
+        allCount.textContent = "Backtest verisi yuklenemedi";
+      });
   </script>
 </body>
 </html>
