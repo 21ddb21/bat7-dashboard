@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BAT7 En Iyi 3 Strateji</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101317;
+      --panel: #171c21;
+      --panel-2: #1d242b;
+      --text: #e8eef2;
+      --muted: #9aa7b0;
+      --line: #303941;
+      --good: #63d471;
+      --bad: #ff6b6b;
+      --accent: #6db9ef;
+      --warn: #f3be4e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+    header {
+      padding: 28px 32px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #14191e;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.15;
+      font-weight: 700;
+    }
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 86px;
+    }
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .value {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+    .positive { color: var(--good); }
+    .negative { color: var(--bad); }
+    .accent { color: var(--accent); }
+    .warn { color: var(--warn); }
+    section {
+      margin-top: 18px;
+    }
+    h2 {
+      font-size: 17px;
+      margin: 0 0 10px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: right;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+    th:first-child, td:first-child { text-align: left; }
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      background: var(--panel-2);
+    }
+    tr:last-child td { border-bottom: 0; }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 9px 11px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    button.active {
+      border-color: var(--accent);
+      background: #213142;
+      color: #dff1ff;
+    }
+    .note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    @media (max-width: 760px) {
+      header { padding: 22px 18px 14px; }
+      main { padding: 16px; }
+      h1 { font-size: 24px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .value { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BAT7 En Iyi 3 Strateji</h1>
+    <p class="sub">SOL, DOGE, XRP, BAT, ENJ, TURBO ve RARE icin en yuksek karli 1h backtest sonuclari</p>
+  </header>
+  <main>
+    <div class="stats" id="stats"></div>
+
+    <section>
+      <h2>En Iyi 3 Strateji</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Dongu</th>
+              <th>Net Kar</th>
+              <th>USDT</th>
+              <th>Win Rate</th>
+              <th>Trade</th>
+              <th>Gunluk</th>
+              <th>Max DD</th>
+              <th>PF</th>
+            </tr>
+          </thead>
+          <tbody id="summary"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Secili Stratejide Coin Bazli Dagilim</h2>
+      <div class="tabs" id="tabs"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Coin</th>
+              <th>Kar</th>
+              <th>USDT</th>
+              <th>Win Rate</th>
+              <th>Trade</th>
+            </tr>
+          </thead>
+          <tbody id="pairs"></tbody>
+        </table>
+      </div>
+      <p class="note">Bu panel sadece backtest sonuclarini gosterir. Bot kontrolu, API key veya gercek emir yetkisi icermez.</p>
+    </section>
+  </main>
+
+  <script>
+    const data = [
+      {"name":"BreakoutAdaptiveBAT7_R2","profit":59.83,"usdt":598.338,"win":42.6,"trades":108,"daily":0.09,"dd":5.21,"pf":1.93,"pairs":[{"pair":"SOL/USDT","trades":28,"profit":31.46,"usdt":314.574,"win":42.9},{"pair":"DOGE/USDT","trades":23,"profit":12.57,"usdt":125.734,"win":43.5},{"pair":"XRP/USDT","trades":15,"profit":11.27,"usdt":112.723,"win":46.7},{"pair":"BAT/USDT","trades":21,"profit":3.45,"usdt":34.48,"win":38.1},{"pair":"ENJ/USDT","trades":13,"profit":1.8,"usdt":18.032,"win":38.5},{"pair":"RARE/USDT","trades":4,"profit":-0.16,"usdt":-1.612,"win":50},{"pair":"TURBO/USDT","trades":4,"profit":-0.56,"usdt":-5.593,"win":50}]},
+      {"name":"BreakoutAdaptiveBAT7_R3","profit":46.75,"usdt":467.515,"win":40.2,"trades":127,"daily":0.11,"dd":8.03,"pf":1.57,"pairs":[{"pair":"SOL/USDT","trades":30,"profit":35.07,"usdt":350.699,"win":46.7},{"pair":"XRP/USDT","trades":20,"profit":10.9,"usdt":109.017,"win":45},{"pair":"DOGE/USDT","trades":27,"profit":10.1,"usdt":100.97,"win":40.7},{"pair":"ENJ/USDT","trades":14,"profit":0.67,"usdt":6.701,"win":35.7},{"pair":"TURBO/USDT","trades":4,"profit":0.02,"usdt":0.24,"win":50},{"pair":"RARE/USDT","trades":6,"profit":-3.63,"usdt":-36.276,"win":33.3},{"pair":"BAT/USDT","trades":26,"profit":-6.38,"usdt":-63.836,"win":30.8}]},
+      {"name":"BreakoutAdaptiveBAT7_R1","profit":46.08,"usdt":460.777,"win":39.7,"trades":126,"daily":0.1,"dd":8.66,"pf":1.57,"pairs":[{"pair":"SOL/USDT","trades":30,"profit":36.69,"usdt":366.866,"win":46.7},{"pair":"DOGE/USDT","trades":27,"profit":11.36,"usdt":113.592,"win":40.7},{"pair":"XRP/USDT","trades":19,"profit":8.42,"usdt":84.235,"win":42.1},{"pair":"TURBO/USDT","trades":4,"profit":-0.56,"usdt":-5.593,"win":50},{"pair":"ENJ/USDT","trades":14,"profit":-1.64,"usdt":-16.443,"win":35.7},{"pair":"BAT/USDT","trades":26,"profit":-3.93,"usdt":-39.3,"win":30.8},{"pair":"RARE/USDT","trades":6,"profit":-4.26,"usdt":-42.581,"win":33.3}]}
+    ];
+
+    const best = data[0];
+    const cls = (n) => n >= 0 ? "positive" : "negative";
+    const pct = (n) => `${n.toFixed(2)}%`;
+    const num = (n) => n.toLocaleString("tr-TR", { maximumFractionDigits: 3 });
+
+    document.getElementById("stats").innerHTML = [
+      ["En iyi dongu", best.name.replace("BreakoutAdaptive", ""), "accent"],
+      ["Net kar", pct(best.profit), "positive"],
+      ["Win rate", `${best.win.toFixed(1)}%`, "warn"],
+      ["Max drawdown", `${best.dd.toFixed(2)}%`, "accent"]
+    ].map(([label, value, color]) => `<div class="stat"><div class="label">${label}</div><div class="value ${color}">${value}</div></div>`).join("");
+
+    document.getElementById("summary").innerHTML = data.map((row) => `
+      <tr>
+        <td>${row.name.replace("BreakoutAdaptive", "")}</td>
+        <td class="${cls(row.profit)}">${pct(row.profit)}</td>
+        <td>${num(row.usdt)}</td>
+        <td>${row.win.toFixed(1)}%</td>
+        <td>${row.trades}</td>
+        <td>${row.daily.toFixed(2)}</td>
+        <td>${row.dd.toFixed(2)}%</td>
+        <td>${row.pf.toFixed(2)}</td>
+      </tr>
+    `).join("");
+
+    const tabs = document.getElementById("tabs");
+    const pairs = document.getElementById("pairs");
+    function selectStrategy(index) {
+      [...tabs.children].forEach((button, i) => button.classList.toggle("active", i === index));
+      pairs.innerHTML = data[index].pairs.map((row) => `
+        <tr>
+          <td>${row.pair}</td>
+          <td class="${cls(row.profit)}">${pct(row.profit)}</td>
+          <td>${num(row.usdt)}</td>
+          <td>${row.win.toFixed(1)}%</td>
+          <td>${row.trades}</td>
+        </tr>
+      `).join("");
+    }
+    data.forEach((row, index) => {
+      const button = document.createElement("button");
+      button.textContent = row.name.replace("BreakoutAdaptive", "");
+      button.addEventListener("click", () => selectStrategy(index));
+      tabs.appendChild(button);
+    });
+    selectStrategy(0);
+  </script>
+</body>
+</html>
